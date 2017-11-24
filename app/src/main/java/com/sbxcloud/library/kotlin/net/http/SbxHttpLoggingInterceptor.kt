@@ -82,11 +82,9 @@ class SbxHttpLoggingInterceptor : Interceptor {
         }
     }
 
-    fun SbxHttpLoggingInterceptor() {
-        this.logger = okhttp3.logging.HttpLoggingInterceptor.Logger.DEFAULT
-    }
+    constructor() : this(okhttp3.logging.HttpLoggingInterceptor.Logger.DEFAULT)
 
-    fun SbxHttpLoggingInterceptor(logger: okhttp3.logging.HttpLoggingInterceptor.Logger) {
+    constructor(logger: okhttp3.logging.HttpLoggingInterceptor.Logger) {
         this.logger = logger
     }
 
