@@ -1,4 +1,4 @@
-package com.sbxcloud.library.kotlin
+package com.sbxcloud.library.kotlin.core
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
@@ -30,7 +30,7 @@ class SbxQuery {
         return this;
     }
 
-     fun setModel(modelName: String): SbxQuery{
+     fun setModel(modelName: String): SbxQuery {
         q["row_model"] = modelName;
         return this;
     }
