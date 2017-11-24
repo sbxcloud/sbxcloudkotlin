@@ -31,7 +31,7 @@ class SbxCore(context: Context, sufix: String) {
         get() =   Request.Builder().apply {
             header("App-Key", prefs!!.appKey)
             if(!prefs!!.token.equals("")){
-                header("token", prefs!!.token)
+                header("Authorization", "Bearer ${prefs!!.token}")
             }
         }
 
