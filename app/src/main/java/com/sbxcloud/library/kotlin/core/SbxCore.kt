@@ -84,7 +84,10 @@ class SbxCore(context: Context, sufix: String) {
      */
     fun runRx(key: String, params: String): Single<out JSONObject>{
         return sendObserver( Single.create( {
-            val r = requestJSON.url(p(urls.cloudscript_run)).post(bodyPOST(params)).build()
+            val r = requestJSON.url(p(urls.cloudscript_run)).post(bodyPOST(JSONObject().apply {
+                put("key", key)
+                put("params", JSONObject(params))
+            }.toString())).build()
             val response = ApiManager.HTTP.newCall(r).execute()
             val jsonObject = JSONObject(response.body()!!.string())
             it.onSuccess(jsonObject)
