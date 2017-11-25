@@ -85,13 +85,16 @@ class SbxCore(context: Context, sufix: String) {
      * @param key the CloudscriptKey
      * @param params jsonString parameters to run cloudscript
      */
-    fun runRx(key: String, params: String): Single<out JSONObject>{
+    fun runRx(key: String, params: String): Single<out JSONObject> {
         return sendObserver( Single.create( {
-            val r = requestJSON.url(p(urls.cloudscript_run)).post(bodyPOST(JSONObject().apply {
-                put("key", key)
-                put("params", JSONObject(params))
-            }.toString())).build()
-            call(r,it)
+            runBlocking {
+                val r = requestJSON.url(p(urls.cloudscript_run)).post(bodyPOST(JSONObject().apply {
+                    put("key", key)
+                    put("params", async (CommonPool) { JSONObject(params) }.await() )
+                }.toString())).build()
+                call(r,it)
+            }
+
         }))
     }
 
