@@ -3,13 +3,10 @@ package com.sbxcloud.library.kotlin.core
 import android.content.Context
 import android.content.SharedPreferences
 import com.sbxcloud.library.kotlin.net.http.ApiManager
-import io.reactivex.Scheduler
-import io.reactivex.Single
+import io.reactivex.*
 import io.reactivex.schedulers.Schedulers
-import okhttp3.HttpUrl
-import okhttp3.MediaType
-import okhttp3.Request
-import okhttp3.RequestBody
+import kotlinx.coroutines.experimental.*
+import okhttp3.*
 import org.json.JSONObject
 
 
@@ -47,7 +44,6 @@ class SbxCore(context: Context, sufix: String) {
     }
 
 
-
     fun initialize(domain: Int, baseUrl: String, appkey: String){
         prefs!!.appKey = appkey
         prefs!!.domain = domain
@@ -55,22 +51,29 @@ class SbxCore(context: Context, sufix: String) {
     }
 
     private fun p(path: String): String{return  prefs!!.baseUrl + path }
-
     private fun bodyPOST(json: String):RequestBody { return RequestBody.create(JSON, json)}
 
 
     /**
      * @param token String of token to validate
      */
-    fun validateRx(token: String): Single<out JSONObject>{
-        return sendObserver( Single.create( {
-            val url = HttpUrl.parse(p(urls.validate))!!.
-                    newBuilder().apply { addQueryParameter("token", token) }.build().toString()
-            val r = request.url(url).build()
-            val response = ApiManager.HTTP.newCall(r).execute()
+    fun validateRx(token: String): Single<out JSONObject>  {
+         return sendObserver( Single.create( {
+                 val url = HttpUrl.parse(p(urls.validate))!!.
+                         newBuilder().apply { addQueryParameter("token", token) }.build().toString()
+                 call(request.url(url).build(),it)
+
+        }))
+    }
+
+    private fun call(r: Request, it: SingleEmitter<JSONObject>) = runBlocking(CommonPool){
+        val response = async(CommonPool) { ApiManager.HTTP.newCall(r).execute() }.await()
+        if(response.isSuccessful){
             val jsonObject = JSONObject(response.body()!!.string())
             it.onSuccess(jsonObject)
-        }))
+        }else{
+            it.onError(Exception(response.message()))
+        }
     }
 
     private fun <T> sendObserver(single: Single<out T>): Single<out T>{
@@ -88,9 +91,7 @@ class SbxCore(context: Context, sufix: String) {
                 put("key", key)
                 put("params", JSONObject(params))
             }.toString())).build()
-            val response = ApiManager.HTTP.newCall(r).execute()
-            val jsonObject = JSONObject(response.body()!!.string())
-            it.onSuccess(jsonObject)
+            call(r,it)
         }))
     }
 
