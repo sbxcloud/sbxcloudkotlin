@@ -101,6 +101,14 @@ class SbxQuery {
         return this;
     }
 
+    fun orderBy (field: String, asc: Boolean): SbxQuery {
+        var temp = if (!asc) false else asc
+        q["order_by"] = JsonObject()
+        (q["order_by"] as JsonObject)["ASC"] = temp
+        (q["order_by"] as JsonObject)["FIELD"] = field
+        return this;
+    }
+
 //     fun setReferenceJoin(operator, filter_field, reference_field, model, value) {
 //        q.reference_join = {
 //            "row_model": model,
