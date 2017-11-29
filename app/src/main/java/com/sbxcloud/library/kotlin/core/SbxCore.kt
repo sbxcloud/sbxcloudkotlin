@@ -269,7 +269,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
                 } else {
                     index = fetch.indexOf(temp[0]);
                 }
-                if (temp.size == 2 && secondfetch.has(fetch[index])) {
+                if (temp.size == 2 && !secondfetch.has(fetch[index])) {
                     secondfetch.put(fetch[index],JSONArray());
                 }
 
