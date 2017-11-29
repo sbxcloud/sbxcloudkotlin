@@ -146,10 +146,6 @@ class SbxQuery {
             throw  Error("Invalid operator: " + operator)
         }
 
-        if (value == null) {
-            throw  Error("Invalid value: " + value);
-        }
-
          (group["GROUP"]as JsonArray<Any?>).add(
                  JsonObject().apply{
             put("ANDOR", myConnector)
