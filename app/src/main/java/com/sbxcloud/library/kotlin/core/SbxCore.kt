@@ -621,6 +621,67 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
         }))
     }
 
+    /**
+     * @param response the response of the server
+     * @param string completefetch the array of fetch
+     * @returns JSONObject the response with the union between fetch_results and results
+     */
+    fun fetchedResult(response: JSONObject, completefetch: Array<String>): JSONObject{
+            if (response.has("fetched_results")) {
+                val jsonFetches = response.getJSONObject("fetched_results")
+                val jsonResult = response.getJSONArray("results")
+                val fetch = ArrayList<String>();
+                val secondfetch = JSONObject();
+                for ( i in 0..completefetch.size) {
+                    var index = 0;
+                    val temp = completefetch[i].split('.');
+                    if (fetch.indexOf(temp[0]) < 0) {
+                        fetch.add(temp[0]);
+                        index = fetch.size - 1;
+                    } else {
+                        index = fetch.indexOf(temp[0]);
+                    }
+                    if (temp.size == 2 && secondfetch.has(fetch[index])) {
+                        secondfetch.put(fetch[index],JSONArray());
+                    }
+
+                    if (temp.size == 2) {
+                        secondfetch.getJSONArray(fetch[index]).put(temp[1]);
+                    }
+                }
+                for (i in 0..jsonResult.length()) {
+                    val jsonData = jsonResult.getJSONObject(i)
+                    for (j in 0..fetch.size) {
+                    for (mod in jsonFetches.keys()) {
+                        val jsonModel = jsonFetches.getJSONObject(mod)
+                        if (jsonModel.has(jsonData.getString(fetch[j]))) {
+                            jsonData.put(fetch[j], jsonModel.getJSONObject(jsonData.getString(fetch[j])))
+                            if (secondfetch.has(fetch[j])) {
+                                for ( k in 0..secondfetch.getJSONArray(fetch[j]).length()) {
+                                    val second = secondfetch.getJSONArray(fetch[j]).getString(k)
+                                    for ( mod2 in jsonFetches.keys()) {
+                                        val jsonModel2 = jsonFetches.getJSONObject(mod2)
+                                        if (jsonModel2.has(jsonData.getJSONObject(fetch[j]).getString(second))) {
+                                            jsonData.getJSONObject(fetch[j])
+                                                    .put(second,jsonModel2.getJSONObject(jsonData.getJSONObject(fetch[j]).getString(second)))
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                }
+            }
+
+            return response;
+        }
+
+
     fun setPage(page: Int): Find {
         this.query.setPage(page);
         return this;
