@@ -260,7 +260,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             val jsonResult = response.getJSONArray("results")
             val fetch = ArrayList<String>();
             val secondfetch = JSONObject();
-            for ( i in 0..completefetch.size) {
+            for ( i in 0..completefetch.size-1) {
                 var index = 0;
                 val temp = completefetch[i].split('.');
                 if (fetch.indexOf(temp[0]) < 0) {
@@ -277,15 +277,15 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
                     secondfetch.getJSONArray(fetch[index]).put(temp[1]);
                 }
             }
-            for (i in 0..jsonResult.length()) {
+            for (i in 0..jsonResult.length()-1) {
                 val jsonData = jsonResult.getJSONObject(i)
-                for (j in 0..fetch.size) {
+                for (j in 0..fetch.size-1) {
                     for (mod in jsonFetches.keys()) {
                         val jsonModel = jsonFetches.getJSONObject(mod)
                         if (jsonModel.has(jsonData.getString(fetch[j]))) {
                             jsonData.put(fetch[j], jsonModel.getJSONObject(jsonData.getString(fetch[j])))
                             if (secondfetch.has(fetch[j])) {
-                                for ( k in 0..secondfetch.getJSONArray(fetch[j]).length()) {
+                                for ( k in 0..secondfetch.getJSONArray(fetch[j]).length()-1) {
                                     val second = secondfetch.getJSONArray(fetch[j]).getString(k)
                                     for ( mod2 in jsonFetches.keys()) {
                                         val jsonModel2 = jsonFetches.getJSONObject(mod2)
