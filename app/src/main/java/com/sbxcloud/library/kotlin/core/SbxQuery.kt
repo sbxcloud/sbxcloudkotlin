@@ -46,7 +46,7 @@ class SbxQuery {
     }
 
      fun fetchModels(arrayOfModelNames: Array<String>): SbxQuery {
-        q["fetch"] = JsonArray(arrayOfModelNames)
+        q["fetch"] = JsonArray(arrayOfModelNames.toList())
         return this;
     }
 
