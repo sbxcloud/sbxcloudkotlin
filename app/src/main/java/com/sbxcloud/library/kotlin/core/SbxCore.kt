@@ -343,7 +343,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
 
 class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHelper(){
 
-    var query = SbxQuery().setDomain(SbxCore.prefs!!.domain)
+    var query = SbxQuery().setModel(model).setDomain(SbxCore.prefs!!.domain)
     var lastANDOR: String? = null
     var totalpages: Int=0;
     var fecth: Array<String>?=null
