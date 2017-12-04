@@ -76,7 +76,7 @@ class SbxQuery {
 
      fun whereWithKeys(keysArray: Array<String>): SbxQuery {
          q["where"]  = JsonObject()
-         (q["where"] as JsonObject)["keys"] = keysArray
+         (q["where"] as JsonObject)["keys"] =  JsonArray(keysArray.toList())
         return this;
     }
 
