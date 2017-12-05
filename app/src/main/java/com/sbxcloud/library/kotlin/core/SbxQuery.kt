@@ -127,7 +127,7 @@ class SbxQuery {
         // override array where
 
          var myConnector =connectorANDorOR
-        if (q["where"] is  JsonArray<*>) {
+        if (!(q["where"] is  JsonArray<*>)) {
             q["where"] = JsonArray<Any?>();
         }
 
