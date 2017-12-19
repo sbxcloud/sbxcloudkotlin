@@ -334,7 +334,34 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
     }
 
 
+    /**
+     * @param data JSONObject
+     * @return {Observable<JSONObject>}
+     */
+    fun  paymentCustomerRx(data: JSONObject):  Single<out JSONObject> {
+        return sendObserver( Single.create( {
+            val r = requestJSON.url(p(HttpHelper.urls.payment_customer)).post(bodyPOST(data.apply {
+                put("domain", SbxCore.prefs!!.domain)
+            }.toString())).build()
+            call(r,it)
+        }))
+    }
+
+    /**
+     * @param data JSONObject
+     * @return {Observable<JSONObject>}
+     */
+    fun paymentCardRx(data: JSONObject):  Single<out JSONObject> {
+        return sendObserver( Single.create( {
+            val r = requestJSON.url(p(HttpHelper.urls.payment_card)).post(bodyPOST(data.apply {
+                put("domain", SbxCore.prefs!!.domain)
+            }.toString())).build()
+            call(r,it)
+        }))
+    }
+
 }
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
