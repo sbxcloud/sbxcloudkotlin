@@ -742,9 +742,16 @@ open class HttpHelper  {
     protected fun bodyPOST(json: String):RequestBody { return RequestBody.create(JSON, json)}
 
     protected fun call(r: Request, it: SingleEmitter<JSONObject>) = runBlocking(CommonPool){
-        with (async(CommonPool) { ApiManager.HTTP.newCall(r).execute() }.await()){
-            if(isSuccessful) it.onSuccess(JSONObject(body()!!.string()))
-            else it.onError(Exception(message())) } }
+        try{
+            with (async(CommonPool) {
+                ApiManager.HTTP.newCall(r).execute() }.await()){
+                if(isSuccessful) it.onSuccess(JSONObject(body()!!.string()))
+                else it.onError(Exception(message()))
+            }
+        }catch (e: Exception){
+            it.onError(e)
+        }
+    }
 
     protected fun <T> sendObserver(single: Single<out T>): Single<out T>{
         return single.subscribeOn(Schedulers.newThread())
