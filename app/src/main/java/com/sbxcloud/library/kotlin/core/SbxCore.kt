@@ -90,7 +90,11 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             }
         }
         if(sw){
+            try{
             call(requestJSON.url(p(url)).post(bodyPOST(json.compile())).build(),it)
+            }catch (e: Exception){
+                it.onError(e)
+            }
         }else{
             it.onError(Exception("Empty Data or duplicate Data"))
         }
@@ -703,8 +707,12 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
 
     fun thenRx(query: String?=null): Single<out JSONObject> {
         return sendObserver( Single.create( {
+            try {
                 call(requestJSON.url(p(if (isFind) urls.find else urls.delete)).post(
-                        bodyPOST(if(query==null) this@Find.query.compile()else query)).build(),it)
+                        bodyPOST(if (query == null) this@Find.query.compile() else query)).build(), it)
+            }catch (e: Exception){
+                it.onError(e)
+            }
         }))
     }
 
@@ -722,8 +730,12 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
 
     private fun find(query: String?=null): Single<out JSONObject> {
         return sendObserver( Single.create( {
+            try{
             call(requestJSON.url(urls.find).post(
                     bodyPOST(if(query==null) this@Find.query.compile()else query)).build(),it)
+            }catch (e: Exception){
+                it.onError(e)
+            }
         }))
 
     }
