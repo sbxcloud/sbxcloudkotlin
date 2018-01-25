@@ -93,10 +93,11 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             try{
             call(requestJSON.url(p(url)).post(bodyPOST(json.compile())).build(),it)
             }catch (e: Exception){
-                it.onError(e)
+                if(!it.isDisposed){it.onError(e)}
+
             }
         }else{
-            it.onError(Exception("Empty Data or duplicate Data"))
+            if(!it.isDisposed){it.onError(Exception("Empty Data or duplicate Data"))}
         }
     }
 
@@ -134,7 +135,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
                         "&name=${name}&login=${login}&domain=${prefs!!.domain}"
                 call(request.url(url).build(), it)
             } else {
-                it.onError(Exception("Login or email contains invalid characters. Letters, numbers and underscore are accepted"))
+                if(!it.isDisposed){ it.onError(Exception("Login or email contains invalid characters. Letters, numbers and underscore are accepted"))}
             }
         }))
     }
@@ -150,7 +151,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
                 val url = "${p(urls.login)}?login=${this.encodeEmails(login)}&password=${URLEncoder.encode(password, "UTF-8")}"
                 call(request.url(url).build(), it)
             } else {
-                it.onError(Exception("Login or email contains invalid characters. Letters, numbers and underscore are accepted"))
+                if(!it.isDisposed){  it.onError(Exception("Login or email contains invalid characters. Letters, numbers and underscore are accepted"))}
             }
         }))
     }
@@ -711,7 +712,7 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
                 call(requestJSON.url(p(if (isFind) urls.find else urls.delete)).post(
                         bodyPOST(if (query == null) this@Find.query.compile() else query)).build(), it)
             }catch (e: Exception){
-                it.onError(e)
+                if(!it.isDisposed){ it.onError(e)}
             }
         }))
     }
@@ -734,7 +735,7 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
             call(requestJSON.url(urls.find).post(
                     bodyPOST(if(query==null) this@Find.query.compile()else query)).build(),it)
             }catch (e: Exception){
-                it.onError(e)
+                if(!it.isDisposed){  it.onError(e)}
             }
         }))
 
@@ -757,11 +758,15 @@ open class HttpHelper  {
         try{
             with (async(CommonPool) {
                 ApiManager.HTTP.newCall(r).execute() }.await()){
-                if(isSuccessful) it.onSuccess(JSONObject(body()!!.string()))
-                else it.onError(Exception(message()))
+                if(isSuccessful){
+                    if(!it.isDisposed){it.onSuccess(JSONObject(body()!!.string()))}
+                }
+                else {
+                    if(!it.isDisposed){ it.onError(Exception(message()))}
+                }
             }
         }catch (e: Exception){
-            it.onError(e)
+            if(!it.isDisposed){it.onError(e)}
         }
     }
 
