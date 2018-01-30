@@ -759,14 +759,14 @@ open class HttpHelper  {
             with (async(CommonPool) {
                 ApiManager.HTTP.newCall(r).execute() }.await()){
                 if(isSuccessful){
-                    if(!it.isDisposed){it.onSuccess(JSONObject(body()!!.string()))}
+                    if(!it.isDisposed){ try{it.onSuccess(JSONObject(body()!!.string()))}catch (e:Exception){e.printStackTrace()}}
                 }
                 else {
-                    if(!it.isDisposed){ it.onError(Exception(message()))}
+                    if(!it.isDisposed){ try{it.onError(Exception(message()))}catch (e:Exception){e.printStackTrace()}}
                 }
             }
         }catch (e: Exception){
-            if(!it.isDisposed){it.onError(e)}
+            if(!it.isDisposed){ try{ it.onError(e)}catch (e:Exception){e.printStackTrace()}}
         }
     }
 
