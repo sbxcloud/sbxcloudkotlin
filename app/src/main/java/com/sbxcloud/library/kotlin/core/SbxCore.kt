@@ -163,7 +163,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
      */
     fun configRx(): Single<out JSONObject> {
         return sendObserver( Single.create({
-                call(request.url(urls.config).build(), it)
+                call(request.url(p(urls.config)).build(), it)
         }))
     }
 
