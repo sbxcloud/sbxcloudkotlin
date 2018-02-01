@@ -156,6 +156,17 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
         }))
     }
 
+    /**
+     * @param  login
+     * @param  password
+     * @return single
+     */
+    fun configRx(): Single<out JSONObject> {
+        return sendObserver( Single.create({
+                call(request.url(urls.config).build(), it)
+        }))
+    }
+
 
     /**
      * Send email to changePassword
@@ -802,5 +813,6 @@ open class HttpHelper  {
     val payment_card: String = "/payment/v1/card",
     val payment_token: String = "/payment/v1/token",
     val password: String = "/user/v1/password/request",
+    val config: String = "/domain/v1/list/app",
     val cloudscript_run: String = "/cloudscript/v1/run"
 )
