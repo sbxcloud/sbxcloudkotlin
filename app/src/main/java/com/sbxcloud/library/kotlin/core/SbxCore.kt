@@ -746,12 +746,17 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
                        val ar = t[i] as JSONObject
                        val results = ar.optJSONArray("results")
                        val fetch = ar.optJSONArray("fetched_results")
-                       for (j in 0..results.length()-1) {
-                           firstResults.put(results[j])
+                       if(results!=null){
+                           for (j in 0..results.length()-1) {
+                               firstResults.put(results[j])
+                           }
                        }
-                       for (j in 0..fetch.length()-1) {
-                           firstFResults.put(fetch[j])
+                       if(fetch!=null){
+                           for (j in 0..fetch.length()-1) {
+                               firstFResults.put(fetch[j])
+                           }
                        }
+
                    }
                 result.put("results",firstResults)
                 result.put("fetched_results",firstFResults)
