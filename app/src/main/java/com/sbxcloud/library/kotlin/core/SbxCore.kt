@@ -7,6 +7,7 @@ import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
 import com.sbxcloud.library.kotlin.net.http.ApiManager
 import io.reactivex.*
+import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.experimental.*
 import okhttp3.*
@@ -726,6 +727,39 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
                 if(!it.isDisposed){ it.onError(e)}
             }
         }))
+    }
+
+    fun thenAllRx(): Single<out JSONObject> {
+        val list = ArrayList<Single<out JSONObject>>()
+        for (i in 0..12){
+            val q = this@Find.query.compile()
+            list.add(thenRx(q.replace("page=1","page=${i+1}")))
+        }
+        return  Single.zip(list, object: Function<Array<Any>, JSONObject>{
+            override fun apply(t: Array<Any>): JSONObject {
+
+               val result= t[0] as JSONObject
+               val firstResults=  result.optJSONArray("results")
+               val firstFResults=  result.optJSONArray("fetched_results")
+                if(t.size>1)
+                   for (i in 1..t.size-1){
+                       val ar = t[i] as JSONObject
+                       val results = ar.optJSONArray("results")
+                       val fetch = ar.optJSONArray("fetched_results")
+                       for (j in 0..results.length()-1) {
+                           firstResults.put(results[j])
+                       }
+                       for (j in 0..fetch.length()-1) {
+                           firstFResults.put(fetch[j])
+                       }
+                   }
+                result.put("results",firstResults)
+                result.put("fetched_results",firstFResults)
+                return result
+            }
+
+        })
+
     }
 
 
