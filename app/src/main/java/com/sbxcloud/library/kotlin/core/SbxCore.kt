@@ -721,6 +721,7 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
     fun thenRx(query: String?=null): Single<out JSONObject> {
         return sendObserver( Single.create( {
             try {
+
                 call(requestJSON.url(p(if (isFind) urls.find else urls.delete)).post(
                         bodyPOST(if (query == null) this@Find.query.compile() else query)).build(), it)
             }catch (e: Exception){
@@ -731,9 +732,10 @@ class Find (var model: String,  var core: SbxCore,val isFind: Boolean ): HttpHel
 
     fun thenAllRx(): Single<out JSONObject> {
         val list = ArrayList<Single<out JSONObject>>()
-        for (i in 0..12){
-            val q = this@Find.query.compile()
-            list.add(thenRx(q.replace("page=1","page=${i+1}")))
+        for (i in 0..10){
+            val q = this@Find.query
+            q.setPage(i+1)
+            list.add(thenRx(q.compile()))
         }
         return  Single.zip(list, object: Function<Array<Any>, JSONObject>{
             override fun apply(t: Array<Any>): JSONObject {
