@@ -13,6 +13,7 @@ import kotlinx.coroutines.experimental.*
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.net.URLEncoder
 
 
@@ -376,6 +377,26 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             call(r,it)
         }))
     }
+
+    /**
+     * @param file
+     * @param fileName
+     * @param directoryKey public directory on SbxCloud
+     */
+    fun uploadFileRx(file: File, fileName: String,  directoryKey: String):  Single<out JSONObject> {
+        val model = JSONObject().apply { put("key",directoryKey) }
+        val MEDIA = MediaType.parse("multipart/form-data")
+        val requestFile = RequestBody.create(MEDIA, file)
+        val body = MultipartBody.Part.createFormData("file", fileName, requestFile)
+        val body2 = MultipartBody.Part.createFormData("model", model.toString())
+        val requestBody = okhttp3.MultipartBody.Builder().setType(MultipartBody.FORM).addPart(body).addPart(body2).build()
+        return sendObserver( Single.create( {
+            val r = requestJSON.url(p(HttpHelper.urls.uploadFile)).post(requestBody).build()
+            call(r,it)
+        }))
+    }
+
+
 
 }
 
