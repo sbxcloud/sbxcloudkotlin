@@ -1,7 +1,6 @@
 package com.sbxcloud.library.kotlin.core
 
 import android.content.Context
-import android.content.SharedPreferences
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Parser
@@ -66,11 +65,11 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
         return response;
     }
 
-    private fun JSONtoJson(json: JSONObject): JsonObject{
+    private fun JSONtoJson(json: JSONObject): JsonObject {
         return parser.parse(StringBuilder(json.toString())) as JsonObject
     }
 
-    private fun JSONAtoJsonA(jsonA: JSONArray): JsonArray<JsonObject>  = runBlocking(CommonPool){
+    private fun JSONAtoJsonA(jsonA: JSONArray): JsonArray<JsonObject> = runBlocking(CommonPool){
         val list = JsonArray<JsonObject>()
         val list2 = ArrayList<Deferred<JsonObject>>()
         for (i in 0..jsonA.length()){
