@@ -5,6 +5,7 @@ import okhttp3.internal.http.HttpHeaders
 import okhttp3.internal.platform.Platform
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
+import java.io.EOFException
 import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.charset.UnsupportedCharsetException
@@ -168,12 +169,16 @@ class SbxHttpLoggingInterceptor : Interceptor {
                 if (contentType != null) {
                     charset = contentType!!.charset(UTF8)
                 }
-
+                if (isPlaintext(buffer)) {
                 logger.log("")
-                logger.log(buffer.readString(charset!!))
+                logger.log(buffer.readString(Math.min(2024,buffer.size()),charset!!))
 
                 logger.log("--> END " + request.method()
                         + " (" + requestBody!!.contentLength() + "-byte body)")
+                } else {
+                    logger.log("--> END " + request.method() + " (binary "
+                            + requestBody.contentLength() + "-byte body omitted)")
+                }
             }
         }
 
@@ -224,9 +229,15 @@ class SbxHttpLoggingInterceptor : Interceptor {
 
                 }
 
+                if (!isPlaintext(buffer)) {
+                    logger.log("");
+                    logger.log("<-- END HTTP (binary " + buffer.size() + "-byte body omitted)");
+                    return response;
+                }
+
                 if (contentLength != 0L) {
                     logger.log("")
-                    logger.log(buffer.clone().readString(charset!!))
+                    logger.log(buffer.clone().readString(Math.min(2024,buffer.size()),charset!!))
                 }
 
                 logger.log("<-- END HTTP (" + buffer.size() + "-byte body)")
@@ -239,5 +250,26 @@ class SbxHttpLoggingInterceptor : Interceptor {
     private fun bodyEncoded(headers: Headers): Boolean {
         val contentEncoding = headers.get("Content-Encoding")
         return contentEncoding != null && !contentEncoding!!.equals("identity", ignoreCase = true)
+    }
+
+    fun isPlaintext(buffer: Buffer): Boolean {
+        try {
+            val prefix = Buffer()
+            val byteCount = if (buffer.size() < 256) buffer.size() else 256
+            buffer.copyTo(prefix, 0, byteCount)
+            for (i in 0..byteCount) {
+                if (prefix.exhausted()) {
+                    break
+                }
+                val codePoint = prefix.readUtf8CodePoint()
+                if (Character.isISOControl(codePoint) && !Character.isWhitespace(codePoint)) {
+                    return false
+                }
+            }
+            return true
+        } catch (e: EOFException) {
+            return false // Truncated UTF-8 sequence.
+        }
+
     }
 }
