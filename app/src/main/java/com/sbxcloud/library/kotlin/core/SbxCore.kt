@@ -8,7 +8,10 @@ import com.sbxcloud.library.kotlin.net.http.ApiManager
 import io.reactivex.*
 import io.reactivex.functions.Function
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -69,11 +72,11 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
         return parser.parse(StringBuilder(json.toString())) as JsonObject
     }
 
-    private fun JSONAtoJsonA(jsonA: JSONArray): JsonArray<JsonObject> = runBlocking(CommonPool){
+    private fun JSONAtoJsonA(jsonA: JSONArray): JsonArray<JsonObject> = runBlocking(newSingleThreadContext("json")){
         val list = JsonArray<JsonObject>()
         val list2 = ArrayList<Deferred<JsonObject>>()
         for (i in 0..jsonA.length()){
-            list2.add(async (CommonPool){ JSONtoJson(jsonA.getJSONObject(i)) })
+            list2.add(async { JSONtoJson(jsonA.getJSONObject(i)) })
         }
         for (i in 0..jsonA.length()){
             list.add( list2[i].await())
@@ -276,15 +279,15 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             val jsonFetches = response.getJSONObject("fetched_results")
             val jsonResult = response.getJSONArray("results")
             val fetch = ArrayList<String>();
-            val secondfetch = JSONObject();
+            val secondfetch = JSONObject()
             for ( i in 0..completefetch.size-1) {
-                var index = 0;
+                var index = 0
                 val temp = completefetch[i].split('.');
                 if (fetch.indexOf(temp[0]) < 0) {
-                    fetch.add(temp[0]);
-                    index = fetch.size - 1;
+                    fetch.add(temp[0])
+                    index = fetch.size - 1
                 } else {
-                    index = fetch.indexOf(temp[0]);
+                    index = fetch.indexOf(temp[0])
                 }
                 if (temp.size == 2 && !secondfetch.has(fetch[index])) {
                     secondfetch.put(fetch[index],JSONArray());
@@ -342,7 +345,7 @@ class SbxCore(context: Context, sufix: String): HttpHelper() {
             runBlocking {
                 val r = requestJSON.url(p(urls.cloudscript_run)).post(bodyPOST(JSONObject().apply {
                     put("key", key)
-                    put("params", async (CommonPool) { JSONObject(params) }.await() )
+                    put("params", async  { JSONObject(params) }.await() )
                 }.toString())).build()
                 call(r,it)
             }
@@ -843,9 +846,9 @@ open class HttpHelper  {
 
     protected fun bodyPOST(json: String):RequestBody { return RequestBody.create(JSON, json)}
 
-    protected fun call(r: Request, it: SingleEmitter<JSONObject>) = runBlocking(CommonPool){
+    protected fun call(r: Request, it: SingleEmitter<JSONObject>) = runBlocking(newSingleThreadContext("call")){
         try{
-            with (async(CommonPool) {
+            with (async {
                 ApiManager.HTTP.newCall(r).execute() }.await()){
                 if(isSuccessful){
                     if(!it.isDisposed){ try{it.onSuccess(JSONObject(body()!!.string()))}catch (e:Exception){e.printStackTrace()}}
