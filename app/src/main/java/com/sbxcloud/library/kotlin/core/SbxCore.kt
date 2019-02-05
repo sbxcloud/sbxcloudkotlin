@@ -848,8 +848,11 @@ open class HttpHelper  {
 
     protected fun call(r: Request, it: SingleEmitter<JSONObject>) = runBlocking(newSingleThreadContext("call")){
         try{
-            with (async {
-                ApiManager.HTTP.newCall(r).execute() }.await()){
+           val deferred =   async {
+                ApiManager.HTTP.newCall(r).execute()
+            }
+            val data = deferred.await()
+            with ( data ){
                 if(isSuccessful){
                     if(!it.isDisposed){ try{it.onSuccess(JSONObject(body()!!.string()))}catch (e:Exception){e.printStackTrace()}}
                 }
